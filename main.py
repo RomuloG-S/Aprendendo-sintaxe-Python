@@ -1,60 +1,66 @@
 def desafio1():
-    #nome = input("Digite seu nome: ")
-    #idade = int(input("Digite sua idade: "))
-
-    #print(f"Olá {nome}, você tem {idade}, anos")
-
     lista = []
-    pessoa1= {
+
+    usuário1 = {
         "id":1,
-        "nome":"Carlão",
-        "email":"carlão@gmail"
+        "nome":"pedro",
+        "email":"pedro@gmail.com"
     }
-    pessoa2 = {
-            "id":2,
-            "nome":"Robertão",
-            "email":"robertão@gmail"
+
+    usuário2 = {
+        "id":2,
+        "nome":"paulo",
+        "email":"paulo@gmail.com"
     }
-    pessoa3 = {
-            "id":3,
-            "nome":"Valéria",
-            "email":"valéria@gmail"
+
+    usuário3 = {
+        "id":3,
+        "nome":"alex",
+        "email":"alex@gmail.com"
     }
-    
-    lista.append(pessoa1)
-    lista.append(pessoa2)
-    lista.append(pessoa3)
-    for pessoa in lista:
-        print(pessoa["nome"])
+
+    lista.append(usuário1)
+    lista.append(usuário2)
+    lista.append(usuário3)
+
+    #for usuario in lista:
+        #print(usuario["nome"])
+
     return lista
 
-
-def buscarUsuário(lista, id):
-    resposta = int(input("digite o id desejado: "))
+def buscaUsuario(lista):
+    resposta = int(input("Digite o id desejado: "))
+    usuarioEncontrado = False
     for pessoa in lista:
         if resposta == pessoa["id"]:
-            print(f"seu usuário é o {pessoa['nome']}")
-            return pessoa
-    raise ValueError("Não há nenhum usuário com este id")
+            usuarioEncontrado = True
+            print(f"O usuário com este id é: {pessoa["nome"]}")
+    if not usuarioEncontrado:
+        print("none")
+        
 
-#lista = desafio1()
-
-#buscarUsuário(lista, id)
-
-class usuario:
-    def __init__(self, id:int, nome:str, email:str):
+lista = desafio1()
+listaU = []
+class Usuario:
+    def __init__(self, id:int = None, nome:str = None, email:str = None):
         self.id = id
         self.nome = nome
         self.email = email
-        self.lista = []
-    def criarUsuário(self):
-        usuario1 = usuario(1, "roberto", "roberto@gmail.com")
-        usuario2 = usuario(2, "ronaldo", "ronaldo@gmail.com")
-        usuario3 = usuario(3, "rodinei", "rodinei@gmail.com")
-        self.lista.append(usuario1)
-        self.lista.append(usuario2)
-        self.lista.append(usuario3)
+    def CriarUsuario(self):
+        resposta = ''
+        while resposta == "":    
+            self.id = int(input("digite o id do usuário: "))
+            self.nome = input("digite o nome do usuário: ")
+            self.email = input("digite o email do usuário: ")
+            resposta = input("se quiser continuar pressione enter, caso contrario digite qualquer coisa: ")
+            usuario = Usuario(self.id, self.nome, self.email)
+            listaU.append(usuario)
+            if resposta != "":
+                break
     def __repr__(self):
-        print(self.lista)
+        usuarios_str = "\n".join([f"{u.id}, {u.nome}, {u.email}" for u in listaU])
+        return f"Os usuários que temos são:\n{usuarios_str}"
 
-usuario.__repr__(self)
+usuarios = Usuario()
+usuarios.CriarUsuario()
+print(usuarios)

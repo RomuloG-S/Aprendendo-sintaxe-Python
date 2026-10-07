@@ -36,6 +36,14 @@ def buscar_usuario(lista:list, id:int):
         raise ValueError("Usuário não encontrado")
 
 def transformar_json(lista:list):
+    #json.dumps transforma objeto em formato json para enviar a resposta
     usuarios_json = json.dumps(lista)
+    #json.loads transforma json em formato objeto para receber a resposta
     usuarios_objeto = json.loads(usuarios_json)
     return usuarios_json, usuarios_objeto
+
+def criar_arquivo(formulario):
+    with open("formulario.json", "w", encoding="utf-8") as arquivo:
+        arquivo.write(formulario)
+
+#def salvar_ler_json

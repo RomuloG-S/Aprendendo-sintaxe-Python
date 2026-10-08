@@ -46,4 +46,7 @@ def criar_arquivo(formulario):
     with open("formulario.json", "w", encoding="utf-8") as arquivo:
         arquivo.write(formulario)
 
-#def salvar_ler_json
+def ler_arquivo(formulario):
+    with open("formulario.json", "r", encoding="utf-8") as arquivo:
+        dado = json.load(arquivo)
+    return dado

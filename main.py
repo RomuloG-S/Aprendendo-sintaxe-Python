@@ -1,22 +1,39 @@
-import json
-from service import buscar_usuario, adicionar_usuario, criar_arquivo, transformar_json, ler_arquivo
+from fastapi import FastAPI
+from pydantic import BaseModel, ConfigDict
+app = FastAPI()
 
-if __name__ == "__main__":
-    lista = []
-    adicionar_usuario(lista, 1, "romulo", "romulo@gmail.com")
-    adicionar_usuario(lista, 2, "pedro", "pedro@gmail.com")
-    adicionar_usuario(lista, 3, "alex", "alex@gmail.com")
-    #json_texto, objeto, foi criado para transformar os dados da lista em uma string,
-    # pois o python não consegue receber alem de str
-    json_texto, objeto = transformar_json(lista)
-    
-    criar_arquivo(json_texto)
-    dados_do_json = ler_arquivo(json_texto)
-    print(dados_do_json[0]["nome"])
-    
+@app.get("/")
+def read_root():
+    return {"mensagem": "Olá mundo"}
 
-    
-#    try:
-#        buscar_usuario(lista, 4)
-#    except ValueError:
-#        print("esse id é inexistente")
+@app.get("/saudacao/{nome}")
+def saudacao(nome:str):
+    return {"mensagem": f"Olá, {nome}"}
+
+@app.get("/soma")
+def soma(a:int, b:int):
+    return {"A soma é": a+b}
+
+#http://localhost:8000/soma?a=abc&b=10
+#{
+#  "detail": [
+#    {
+#      "type": "int_parsing",
+#      "loc": [
+#        "query",
+#        "a"
+#      ],
+#      "msg": "Input should be a valid integer, unable to parse string as an integer",
+#      "input": "abc"
+#    }
+#  ]
+#}
+
+class Usuario(BaseModel):
+    nome: str
+    email: str
+    idade: int
+
+@app.post("/usuarios")
+def usuarios(usuario:Usuario):
+    return usuario  

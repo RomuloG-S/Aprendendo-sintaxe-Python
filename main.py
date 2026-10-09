@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, EmailStr
 app = FastAPI()
 
 @app.get("/")
@@ -11,6 +11,8 @@ def saudacao(nome:str):
     return {"mensagem": f"Olá, {nome}"}
 
 @app.get("/soma")
+#tem que usar o query que no caso seria o http://localhost:8000/soma?a=10&b=10
+#e não introduzir no método
 def soma(a:int, b:int):
     return {"A soma é": a+b}
 
@@ -31,8 +33,8 @@ def soma(a:int, b:int):
 
 class Usuario(BaseModel):
     nome: str
-    email: str
-    idade: int
+    email: EmailStr
+    idade: int = Field(ge=1, description="não existe idade negativa")
 
 @app.post("/usuarios")
 def usuarios(usuario:Usuario):

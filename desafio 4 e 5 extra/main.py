@@ -1,123 +1,136 @@
 from typing import Annotated
-from fastapi import FastAPI, APIRouter, HTTPException, Query
-import json
+from fastapi import FastAPI, APIRouter, HTTPException, status, Path
+from model import ProdutoCreate, ProdutoResponse
+
+#definindo as rotas, calculadora e rota produto
+calculadora = APIRouter(prefix = "/calculadora", tags = ["calculadora"])
+produto = APIRouter(prefix="/produto", tags = ["produto"])
+#criando o app, é a base e só se cria uma vez
 app = FastAPI()
-produto = APIRouter(prefix="/prod", tags=["Produtos"])
-calculadora = APIRouter(prefix="/calc", tags=["Calculadora"])
-@app.get("/")
+
+@app.get("/status")
 def status():
-    return {"status": "online", "versão": 1.0}
+    return {"status": "Online", "Versão": 1.0}
 
-@calculadora.get("/soma")
+@calculadora.get("/somar")
 def soma(a:int, b:int):
-    return {"soma": a+b}
-
-@calculadora.get("/subtracao")
-def subtracao(a:int, b:int):
-    return {"Subtração": a-b}
-
-@calculadora.get("/multiplicacao")
-def multiplicacao(a:int, b:int):
-    return {"Multiplicação": a*b}
-
-@calculadora.get("/divisao")
-def divisao(a:int, b:int):
+    return {"soma" : a + b}
+@calculadora.get("/subtrair")
+def subtração(a:int, b:int):
+    return {"subtração" : a - b}
+@calculadora.get("/multiplicar")
+def multiplicação(a:int, b:int):
+    return {"produto" : a * b}
+@calculadora.get("/dividir")
+def divisão(a:int, b:int):
     if b <= 0:
-        return HTTPException(status_code=404, detail="insira um divisor maior que 0")
-    return {"Divisão": a/b}
+        raise HTTPException(
+        status_code=status.HTTP404_NOT_FOUND,
+        detail= "dado inválido"
+        )
+    return {"divisão" : a/b}
 
-@produto.get("/produtos/{produto_id}")
-def Procurar_Produto(p_id:int):
-    if p_id <= 0:
-        return HTTPException(status_code=404, detail="insira um id maior que 0")
-    return {"mensagem": "Produto encontrado"}
+@app.get("/produtos/{produto_id}")
+def get_produto(produto:int):
+    if produto <= 0:
+        raise HTTPException(
+            status_code=status.HTTP404_BAD_REQUEST,
+            detail = "dado invalido"
+        )
+    return {"produto" : "encontrado"}
 
-#Please correct the following validation errors and try again.
-#For 'p_id': Value must be an integer.
+@app.get("/busca")
+def busca(nome = None):
+    if nome == None:
+        return {"mensagem": "nenhum filtro aplicao"}
+    if nome != None:
+        return {"mensagem": f"Buscando por {nome}"}
 
-@produto.get("/busca")
-def Busca(nome:str | None = None):
-    if nome is None:
-        return {"mensagem": "Nenhum filtro aplicado"}
-    return {"mensagem": f"Buscando por {nome}"}
-
-@produto.get("/usuarios/{usuario_id}/posts")
-def seila(u_id:int, limite:Annotated[int | None , Query(ge=0, le=100)] = None, ordem:str = None):
-    forms = {"u_id":u_id,
-             "limite":limite,
-             "ordem":ordem}
-    return {"mensagem": forms}
-
-produtos = []
-
-item1 = {
-    "id":1,
-    "nome":"bola",
-    "preço":100,
-    "categoria":"esporte"
-},
-item2 = {
-    "id":2,
-    "nome":"boneca",
-    "preço":150,
-    "categoria":"brinquedo"
+@app.get("/usuarios/{usuario_id}/post")
+def forms(usuario, limite: Annotated[int, Path(ge = 0, le = 100)] = 10, ordem:str = "recentes"):
+    return {"formulario" f"{usuario, limite, ordem}"}
+p1 = {
+    "id": 1,
+    "nome": "faca",
+    "preco": 10,
+    "categoria": "cozinha"
 }
-item3 = {
-    "id":3,
-    "nome":"prato",
-    "preço":30,
-    "categoria":"cozinha"
+p2 = {
+    "id": 2,
+    "nome": "garfo",
+    "preco": 10,
+    "categoria": "cozinha"
 }
-item4 = {
-    "id":4,
-    "nome":"garfo",
-    "preço":5,
-    "categoria":"cozinha"
+p3 = {
+    "id": 3,
+    "nome": "colher",
+    "preco": 10,
+    "categoria": "cozinha"
 }
-item5 = {
-    "id":5,
-    "nome":"faca",
-    "preço":5,
-    "categoria":"cozinha"
+p4 = {
+    "id": 4,
+    "nome": "celular",
+    "preco": 1000,
+    "categoria": "eletronico"
 }
-item5 = {
-    "id":5,
-    "nome":"faca",
-    "preço":5,
-    "categoria":"cozinha"
-}          
-item6 = {
-    "id":6,
-    "nome":"mouse",
-    "preço":99,
-    "categoria":"eletronica"
-}              
-produtos.extend([item1, item2, item3, item4, item5, item6])
-@produto.get("/produtos")
-def Listar_Produtos(categoria: str, preço: int):
-    resultado = []
-    
-    for produto in produtos:
-        if isinstance(produto, str):
-            try:
-                produto = json.loads(produto)
-            except:
-                continue
-                
-        if isinstance(produto, dict):
-            prod_categoria = produto.get("categoria")
-            prod_nome = produto.get("nome")
-            prod_preço = produto.get("preço")
-            
-            if categoria == prod_categoria and prod_preço is not None and preço > prod_preço:
-                
-                resultado.append({
-                    "categoria": prod_categoria,
-                    "nome": prod_nome,
-                    "preço": prod_preço
-                })
-    return {"categoria buscada": categoria, "preço maximo": preço, "itens encontrados": resultado}
+p5 = {
+    "id": 5,
+    "nome": "playstation",
+    "preco": 4000,
+    "categoria": "eletronico"
+}
+
+lista = [p1, p2, p3, p4, p5]
+
+#endpoint para listar todos produtos da lista que foi definida acima
+@produto.get("/todos")
+def todos(categoria:str = None, preco:int = None):
+    #filtro 1: listar todos já que não tem filtro
+    if categoria == None and preco == None:
+        return lista
+    #filtro 2: listar filtro duplo, obrigado a usar os 2 filtros
+    if categoria != None and preco != None:
+            produto_filtrado = []
+            for produto in lista:
+                if categoria == produto["categoria"]:
+                    if produto["preco"] < preco:
+                        produto_filtrado.append(produto)
+            return produto_filtrado
+    #filtro 3: filtrar só por categoria
+    if categoria != None:
+        produto_cat = []
+        for produto in lista:
+            if categoria == produto["categoria"]:
+                produto_cat.append(produto)
+        return produto_cat
+    #filtro 4: filtrar só por preço
+    if preco != None:
+        produto_pre = []
+        for produto in lista:
+            if produto["preco"] < preco:
+                produto_pre.append(produto)
+        return produto_pre
+
+@produto.get("/{produto_id}")
+#filtrar por id
+def item_especifico(id:int):
+    for produto in lista:
+        if id == produto["id"]:
+            return produto
+    else:
+        #informando o erro que deu caso não encontre o id
+        raise HTTPException(
+            #status 404 Not Found
+                        status_code=404, detail="Produto não encontrado"
+                    )
+
+@app.post("/produtos")
+#tem que inserir o parametro e usar o model como modelo mesmo, igual usar int ou str
+#e como é um post, os dados vão ser inseridos no swagger
+def produto_model(produto: ProdutoCreate, status_code=201, response_model=ProdutoResponse):
+    return {"Mensagem": "Produto criado", "Produto": produto}
 
 
+#usado para definir e diminuir a rota
 app.include_router(calculadora)
 app.include_router(produto)
